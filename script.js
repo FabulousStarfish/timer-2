@@ -47,8 +47,7 @@ function stopWatch() {
 			tx.style.color = "white";
 		}
 		count++;
-		light()
-
+		toggleFlashlight();
 		if (count == 100) {
 			second++;
 			count = 0;
@@ -84,50 +83,29 @@ function stopWatch() {
 	}
 }
 
-function light(){
-const SUPPORTS_MEDIA_DEVICES = 'mediaDevices' in navigator;
+function toggleFlashlight() {
+	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+		navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+			.then(function(stream) {
+				const track = stream.getVideoTracks()[0];
+				const imageCapture = new ImageCapture(track);
 
-if (SUPPORTS_MEDIA_DEVICES) {
-  //Get the environment camera (usually the second one)
-  navigator.mediaDevices.enumerateDevices().then(devices => {
-  
-    const cameras = devices.filter((device) => device.kind === 'videoinput');
-
-    if (cameras.length === 0) {
-      throw 'No camera found on this device.';
-    }
-    const camera = cameras[cameras.length - 1];
-
-    // Create stream and get video track
-    navigator.mediaDevices.getUserMedia({
-      video: {
-        deviceId: camera.deviceId,
-        facingMode: ['user', 'environment'],
-        height: {ideal: 1080},
-        width: {ideal: 1920}
-      }
-    }).then(stream => {
-      const track = stream.getVideoTracks()[0];
-
-      //Create image capture object and get camera capabilities
-      const imageCapture = new ImageCapture(track)
-      const photoCapabilities = imageCapture.getPhotoCapabilities().then(() => {
-
-        //todo: check if camera has a torch
-
-        //let there be light!
-        const btn = document.querySelector('.switch');
-        btn.addEventListener('click', function(){
-          track.applyConstraints({
-            advanced: [{torch: true}]
-          });
-        });
-      });
-    });
-  });
-  
-  //The light will be on as long the track exists
-  
-  
-}
+				imageCapture.getPhotoCapabilities()
+					.then(function(photoCapabilities) {
+						if (photoCapabilities.fillLightMode.includes('flash')) {
+							track.applyConstraints({
+								advanced: [{ torch: true }]
+							});
+						}
+					})
+					.catch(function(error) {
+						console.error('Error getting photo capabilities: ', error);
+					});
+			})
+			.catch(function(error) {
+				console.error('Error accessing camera: ', error);
+			});
+	} else {
+		console.error('getUserMedia is not supported in this browser.');
+	}
 }
