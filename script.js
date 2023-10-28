@@ -7,7 +7,8 @@ let second = 0;
 let count = 0;
 
 startBtn.addEventListener('click', function () {	
-	timer = true;
+	timer = true;	
+	toggleFlashlight();
 	stopWatch();
 	
 });
@@ -47,7 +48,6 @@ function stopWatch() {
 			tx.style.color = "white";
 		}
 		count++;
-		toggleFlashlight();
 		if (count == 100) {
 			second++;
 			count = 0;
@@ -84,28 +84,33 @@ function stopWatch() {
 }
 
 function toggleFlashlight() {
-	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-		navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-			.then(function(stream) {
-				const track = stream.getVideoTracks()[0];
-				const imageCapture = new ImageCapture(track);
-
-				imageCapture.getPhotoCapabilities()
-					.then(function(photoCapabilities) {
-						if (photoCapabilities.fillLightMode.includes('flash')) {
-							track.applyConstraints({
-								advanced: [{ torch: true }]
-							});
-						}
-					})
-					.catch(function(error) {
-						console.error('Error getting photo capabilities: ', error);
-					});
-			})
-			.catch(function(error) {
-				console.error('Error accessing camera: ', error);
-			});
-	} else {
-		console.error('getUserMedia is not supported in this browser.');
+	if (photoCapabilities.fillLightMode.includes('flash')) {
+		track.applyConstraints({
+			advanced: [{ torch: true }]
+		});
 	}
+	// if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+	// 	navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+	// 		.then(function(stream) {
+	// 			const track = stream.getVideoTracks()[0];
+	// 			const imageCapture = new ImageCapture(track);
+
+	// 			imageCapture.getPhotoCapabilities()
+	// 				.then(function(photoCapabilities) {
+	// 					if (photoCapabilities.fillLightMode.includes('flash')) {
+	// 						track.applyConstraints({
+	// 							advanced: [{ torch: true }]
+	// 						});
+	// 					}
+	// 				})
+	// 				.catch(function(error) {
+	// 					console.error('Error getting photo capabilities: ', error);
+	// 				});
+	// 		})
+	// 		.catch(function(error) {
+	// 			console.error('Error accessing camera: ', error);
+	// 		});
+	// } else {
+	// 	console.error('getUserMedia is not supported in this browser.');
+	// }
 }
