@@ -8,9 +8,9 @@ let count = 0;
 
 startBtn.addEventListener('click', function () {	
 	timer = true;	
-	toggleFlashlight();
 	stopWatch();
 	
+	toggleFlashlight();
 });
 
 stopBtn.addEventListener('click', function () {
